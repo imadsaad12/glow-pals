@@ -7,7 +7,7 @@
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-  const money = (n) => "$" + n.toFixed(2);
+  const money = (n) => "$" + (n % 1 === 0 ? n : n.toFixed(2));
 
   /* ---------- Order pipeline (demand test) ---------- */
   const DISCORD_WEBHOOK =
@@ -86,7 +86,7 @@
   const state = {
     variant: VARIANTS[0],
     bundleQty: 2,
-    bundlePrice: 49.95,
+    bundlePrice: 40,
     galIndex: 0,
     cart: [],
   };
