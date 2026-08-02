@@ -212,7 +212,7 @@
   $("#cartClose").addEventListener("click", closeDrawer);
   overlay.addEventListener("click", closeDrawer);
 
-  function addToCart(showDrawer = true) {
+  function addToCart(showDrawer = true, source = "unknown") {
     const total = UNIT_PRICE * state.qty;
     state.cart.push({
       id: Date.now() + "-" + Math.round(total * 100),
@@ -229,7 +229,8 @@
     track("add_to_cart", {
       currency: "USD",
       value: total,
-      items: [{ item_name: PRODUCT.name, item_variant: state.variant.name, quantity: state.qty }],
+      cta: source, // which button was clicked
+      items: [{ item_name: PRODUCT.name, item_variant: state.variant.name, quantity: state.qty, price: UNIT_PRICE }],
     });
   }
 
@@ -274,10 +275,27 @@
     );
   }
 
-  // BUY NOW → straight to checkout; "add to cart" links open the drawer
-  $("#buyNow").addEventListener("click", () => { addToCart(false); openCheckout(); });
-  $("#stickyBtn").addEventListener("click", () => addToCart(true));
-  $("#buyInstant").addEventListener("click", () => addToCart(true));
+  // BUY NOW → straight to checkout; "add to cart" links open the drawer.
+  // Each button fires its own named GA event so counts are separable.
+  $("#buyNow").addEventListener("click", () => {
+    track("click_buy_now", {
+      item_name: PRODUCT.name,
+      item_variant: state.variant.name,
+      quantity: state.qty,
+      value: UNIT_PRICE * state.qty,
+      currency: "USD",
+    });
+    addToCart(false, "buy_now");
+    openCheckout();
+  });
+  $("#stickyBtn").addEventListener("click", () => {
+    track("click_add_to_cart", { item_name: PRODUCT.name, cta: "sticky_bar" });
+    addToCart(true, "sticky_bar");
+  });
+  $("#buyInstant").addEventListener("click", () => {
+    track("click_add_to_cart", { item_name: PRODUCT.name, cta: "under_buy_now" });
+    addToCart(true, "under_buy_now");
+  });
 
   /* ============================================================
      Checkout
@@ -301,7 +319,16 @@
     $("#checkoutView").hidden = false;
     $("#thanksView").hidden = true;
     coOverlay.classList.add("show");
-    track("begin_checkout", { currency: "USD", value: total });
+    track("begin_checkout", {
+      currency: "USD",
+      value: total,
+      items: state.cart.map((c) => ({
+        item_name: PRODUCT.name,
+        item_variant: c.variant,
+        quantity: c.qty,
+        price: UNIT_PRICE,
+      })),
+    });
   }
   function closeCheckout() { coOverlay.classList.remove("show"); }
 
@@ -345,7 +372,18 @@
       console.error(err);
     }
 
-    track("place_order", { currency: "USD", value: total });
+    // GA4 standard "purchase" → shows in Monetization reports with revenue
+    track("purchase", {
+      transaction_id: "MT-" + Date.now(),
+      currency: "USD",
+      value: total,
+      items: state.cart.map((c) => ({
+        item_name: PRODUCT.name,
+        item_variant: c.variant,
+        quantity: c.qty,
+        price: UNIT_PRICE,
+      })),
+    });
 
     btn.disabled = false;
     btn.innerHTML = btnHtml;
@@ -396,4 +434,11 @@
   updatePrices();
   renderCart();
   setMain(0);
+
+  // GA4 funnel start: product page viewed
+  track("view_item", {
+    currency: "USD",
+    value: UNIT_PRICE,
+    items: [{ item_name: PRODUCT.name, price: UNIT_PRICE }],
+  });
 })();
