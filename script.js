@@ -32,7 +32,7 @@
       .map((c) => `• ${c.variant} — Pack of ${c.qty} (${money(c.price)})`)
       .join("\n");
     const payload = {
-      content: "🧸 **NEW ORDER** — Magic Glow Plush (COD 🇱🇧)",
+      content: `${PRODUCT.emoji} **NEW ORDER** — ${PRODUCT.name} (COD 🇱🇧)`,
       embeds: [
         {
           title: "Order details",
@@ -56,31 +56,13 @@
     if (!res.ok) throw new Error("Discord webhook failed: " + res.status);
   }
 
-  /* ---------- Data ---------- */
-  const VARIANTS = [
-    { id: "penguin", name: "Penguin", split: "assets/NO_14_1.webp" },
-    { id: "bunny",   name: "Bunny",   split: "assets/NO_16_1.webp" },
-    { id: "bear",    name: "Bear",    split: "assets/NO_17_1.webp" },
-    { id: "fox",     name: "Fox",     split: "assets/NO_15_1.webp" },
-  ];
-
-  // Gallery — index 2 is the currently-selected variant image (dynamic)
-  const GALLERY = [
-    "assets/NO_8_1.webp",   // hero — free gifts
-    "assets/NO_12.webp",    // girl holding all four
-    VARIANTS[0].split,      // dynamic variant
-    "assets/NO_10_1.webp",  // kids drawing
-    "assets/NO_9_1.webp",   // the pen
-    "assets/NO_7.webp",     // size
-  ];
-  const VARIANT_GAL_INDEX = 2;
-
-  const VIDEOS = [
-    { src: "assets/video/demo1.mp4", poster: "assets/video/poster1.jpg", tag: "😍 Mom fave" },
-    { src: "assets/video/demo2.mp4", poster: "assets/video/poster2.jpg", tag: "🌙 Bedtime" },
-    { src: "assets/video/demo3.mp4", poster: "assets/video/poster3.jpg", tag: "🎁 Gift idea" },
-    { src: "assets/video/demo4.mp4", poster: "assets/video/poster4.jpg", tag: "✨ So cute" },
-  ];
+  /* ---------- Product config ----------
+     Each product page defines window.PRODUCT inline before loading this
+     script: { name, title, emoji, giftLine, variants, gallery, videos }   */
+  const PRODUCT = window.PRODUCT || {};
+  const VARIANTS = PRODUCT.variants || [];
+  const GALLERY = PRODUCT.gallery || [];
+  const VIDEOS = PRODUCT.videos || [];
 
   /* ---------- State ---------- */
   const state = {
@@ -138,10 +120,7 @@
     $$(".swatch", swatchesEl).forEach((s, i) =>
       s.classList.toggle("active", VARIANTS[i].id === v.id)
     );
-    GALLERY[VARIANT_GAL_INDEX] = v.split;
-    renderThumbs();
-    if (showInGallery) setMain(VARIANT_GAL_INDEX);
-    else if (state.galIndex === VARIANT_GAL_INDEX) setMain(VARIANT_GAL_INDEX);
+    if (showInGallery) setMain(v.galIndex);
   }
 
   /* ============================================================
@@ -170,7 +149,7 @@
   VARIANTS.forEach((v) => {
     const c = document.createElement("div");
     c.className = "vcard";
-    c.innerHTML = `<img src="${v.split}" alt="${v.name} glow plush" loading="lazy"><div class="vcard-name">${v.name}</div>`;
+    c.innerHTML = `<img src="${v.split}" alt="${v.name} smart track car" loading="lazy"><div class="vcard-name">${v.name}</div>`;
     c.addEventListener("click", () => {
       selectVariant(v, true);
       $("#buy").scrollIntoView({ behavior: "smooth" });
@@ -238,7 +217,7 @@
     track("add_to_cart", {
       currency: "USD",
       value: state.bundlePrice,
-      items: [{ item_name: "Magic Glow Plush", item_variant: state.variant.name, quantity: state.bundleQty }],
+      items: [{ item_name: PRODUCT.name, item_variant: state.variant.name, quantity: state.bundleQty }],
     });
   }
 
@@ -260,9 +239,9 @@
       <div class="cart-item" data-id="${c.id}">
         <img src="${c.img}" alt="${c.variant}">
         <div class="cart-item-info">
-          <strong>Magic Glow Plush™</strong>
+          <strong>${PRODUCT.title}</strong>
           <div class="ci-variant">${c.variant} · Pack of ${c.qty}</div>
-          <div class="ci-gift">🎁 + Free Magic Glow Pen</div>
+          <div class="ci-gift">${PRODUCT.giftLine}</div>
           <div class="ci-bottom">
             <span class="ci-price">${money(c.price)}</span>
             <button class="ci-remove" data-id="${c.id}">Remove</button>
@@ -341,9 +320,9 @@
 
     // Local backup of every order attempt
     try {
-      const orders = JSON.parse(localStorage.getItem("glowpals_orders") || "[]");
+      const orders = JSON.parse(localStorage.getItem("magicaltoys_orders") || "[]");
       orders.push({ customer: data, cart: state.cart, total, ts: new Date().toISOString() });
-      localStorage.setItem("glowpals_orders", JSON.stringify(orders));
+      localStorage.setItem("magicaltoys_orders", JSON.stringify(orders));
     } catch (_) {}
 
     // Notify Discord (order details) — still show the popup if it fails
