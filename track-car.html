@@ -106,19 +106,26 @@
         <p class="p-sub">The 4-in-1 smart car your kids control with a <em>marker</em> — draw any track and it follows
           the line, plays tag with their hands, chases the ball, or drives by remote. 🚗✨</p>
 
-        <div class="price-row">
-          <span class="price-now">$22</span>
-          <span class="price-was">$44</span>
-          <span class="price-tag">You save $22</span>
+        <div class="price-row2">
+          <span class="price-was2">$44</span>
+          <span class="price-now2">$22</span>
+          <span class="save-pill">🏷️ Save 50% off</span>
         </div>
 
-        <ul class="mini-benefits">
-          <li>🖊️ Draw a road with any marker — it follows every curve</li>
-          <li>🖐️ Smart sensors: it follows their hand… or runs away!</li>
-          <li>⚽ Ball mode + 🎮 remote control — both included FREE</li>
-          <li>🚚 Delivery within 2 days — pay cash at your door</li>
-          <li>🛡️ 90-day money-back guarantee</li>
+        <hr class="bb-div" />
+
+        <ul class="urgency">
+          <li>🔥 Hurry! Selling out fast</li>
+          <li>🔔 <span><strong class="u-num" id="viewersNow">214</strong> people are viewing this right now.</span>
+          </li>
+          <li>🏁 This deal will end soon!</li>
         </ul>
+
+        <div class="trust-row">
+          <div><span>🛡️</span>90-Day Guarantee</div>
+          <div><span>💵</span>Cash on Delivery</div>
+          <div><span>🚚</span>2-Day Delivery</div>
+        </div>
 
         <!-- Variant -->
         <div class="option-block">
@@ -126,36 +133,13 @@
           <div class="swatches" id="swatches"><!-- injected by JS --></div>
         </div>
 
-        <!-- Bundle -->
+        <!-- Quantity -->
         <div class="option-block">
-          <div class="option-label">Select your pack <span class="option-hint">(more = bigger savings 🎁)</span></div>
-          <div class="bundles" id="bundles">
-            <label class="bundle" data-qty="1" data-price="22">
-              <input type="radio" name="bundle" value="1" />
-              <div class="bundle-body">
-                <div class="bundle-top"><span class="bundle-name">1 Track Car</span><span
-                    class="bundle-price">$22</span></div>
-                <div class="bundle-note">Great to try it out</div>
-              </div>
-            </label>
-            <label class="bundle is-selected" data-qty="2" data-price="40">
-              <input type="radio" name="bundle" value="2" checked />
-              <span class="bundle-flag">MOST POPULAR</span>
-              <div class="bundle-body">
-                <div class="bundle-top"><span class="bundle-name">2 Track Cars</span><span class="bundle-price">$40
-                    <s>$44</s></span></div>
-                <div class="bundle-note">Save $4 — let them race each other</div>
-              </div>
-            </label>
-            <label class="bundle" data-qty="3" data-price="57">
-              <input type="radio" name="bundle" value="3" />
-              <span class="bundle-flag flag-deal">BEST DEAL</span>
-              <div class="bundle-body">
-                <div class="bundle-top"><span class="bundle-name">3 Track Cars</span><span class="bundle-price">$57
-                    <s>$66</s></span></div>
-                <div class="bundle-note">Save $9 — the whole convoy</div>
-              </div>
-            </label>
+          <div class="option-label">Quantity</div>
+          <div class="qty-row">
+            <button type="button" id="qtyMinus" aria-label="Decrease quantity">−</button>
+            <span class="qty-val" id="qtyValue">1</span>
+            <button type="button" id="qtyPlus" aria-label="Increase quantity">+</button>
           </div>
         </div>
 
@@ -167,28 +151,16 @@
         </div>
 
         <!-- CTA -->
-        <button class="btn-buy" id="buyNow">Add to Cart — <span id="ctaPrice">$40</span></button>
-        <p class="cta-sub">or <button class="linkish" id="buyInstant">buy it now →</button></p>
+        <button class="btn-buy btn-buynow" id="buyNow">Buy Now — <span id="ctaPrice">$22</span></button>
+        <p class="cta-sub">or <button class="linkish" id="buyInstant">add to cart 🛒</button></p>
 
-        <!-- Trust -->
-        <div class="trust-mini">
-          <div><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg> 90-Day Guarantee</div>
-          <div><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg> Cash on Delivery</div>
-          <div><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="1" y="3" width="15" height="13" />
-              <path d="M16 8h4l3 3v5h-7z" />
-              <circle cx="5.5" cy="18.5" r="2.5" />
-              <circle cx="18.5" cy="18.5" r="2.5" />
-            </svg> 2-Day Delivery</div>
-        </div>
+        <!-- Benefits -->
+        <ul class="mini-benefits">
+          <li>🖊️ Draw a road with any marker — it follows every curve</li>
+          <li>🖐️ Smart sensors: it follows their hand… or runs away!</li>
+          <li>⚽ Ball mode + 🎮 remote control — both included FREE</li>
+          <li>🚚 Delivery within 2 days — pay cash at your door</li>
+        </ul>
 
       </div>
     </section>
@@ -557,7 +529,7 @@
   <div class="sticky-buy" id="stickyBuy">
     <div class="sticky-info">
       <span class="sticky-name">Magic Track Car™</span>
-      <span class="sticky-price"><strong id="stickyPrice">$40</strong> <s>$44</s></span>
+      <span class="sticky-price"><strong id="stickyPrice">$22</strong> <s>$44</s></span>
     </div>
     <button class="btn-buy" id="stickyBtn">Add to Cart</button>
   </div>
@@ -636,6 +608,8 @@
       title: "Magic Track Car™",
       emoji: "🚗",
       giftLine: "🎁 + Free Remote & Ball",
+      price: 22,
+      compareAt: 44,
       variants: [
         { id: "racecar", name: "Race Car", split: "assets/car-pink.webp", galIndex: 0 },
         { id: "minibus", name: "Mini Bus", split: "assets/bus-white.webp", galIndex: 1 },

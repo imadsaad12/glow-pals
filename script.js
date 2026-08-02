@@ -1,6 +1,6 @@
 /* ============================================================
    GlowPals — Magic Glow Plush
-   Gallery · variants · bundles · cart · checkout · videos
+   Gallery · variants · quantity · cart · checkout · videos
    ============================================================ */
 (function () {
   "use strict";
@@ -29,7 +29,7 @@
 
   async function sendOrderToDiscord(data, cart, total) {
     const items = cart
-      .map((c) => `• ${c.variant} — Pack of ${c.qty} (${money(c.price)})`)
+      .map((c) => `• ${c.variant} × ${c.qty} (${money(c.price)})`)
       .join("\n");
     const payload = {
       content: `${PRODUCT.emoji} **NEW ORDER** — ${PRODUCT.name} (COD 🇱🇧)`,
@@ -64,11 +64,12 @@
   const GALLERY = PRODUCT.gallery || [];
   const VIDEOS = PRODUCT.videos || [];
 
+  const UNIT_PRICE = PRODUCT.price || 22;
+
   /* ---------- State ---------- */
   const state = {
     variant: VARIANTS[0],
-    bundleQty: 2,
-    bundlePrice: 40,
+    qty: 1,
     galIndex: 0,
     cart: [],
   };
@@ -124,22 +125,30 @@
   }
 
   /* ============================================================
-     Bundles
+     Quantity stepper
      ============================================================ */
-  const bundlesEl = $("#bundles");
-  $$(".bundle", bundlesEl).forEach((b) => {
-    b.addEventListener("click", () => {
-      $$(".bundle", bundlesEl).forEach((x) => x.classList.remove("is-selected"));
-      b.classList.add("is-selected");
-      b.querySelector("input").checked = true;
-      state.bundleQty = parseInt(b.dataset.qty, 10);
-      state.bundlePrice = parseFloat(b.dataset.price);
-      updatePrices();
-    });
-  });
+  const qtyValueEl = $("#qtyValue");
+  $("#qtyMinus").addEventListener("click", () => setQty(state.qty - 1));
+  $("#qtyPlus").addEventListener("click", () => setQty(state.qty + 1));
+  function setQty(q) {
+    state.qty = Math.min(10, Math.max(1, q));
+    qtyValueEl.textContent = state.qty;
+    updatePrices();
+  }
   function updatePrices() {
-    $("#ctaPrice").textContent = money(state.bundlePrice);
-    $("#stickyPrice").textContent = money(state.bundlePrice);
+    $("#ctaPrice").textContent = money(UNIT_PRICE * state.qty);
+    $("#stickyPrice").textContent = money(UNIT_PRICE * state.qty);
+  }
+
+  /* ---------- Live viewers (social proof) ---------- */
+  const viewersEl = $("#viewersNow");
+  if (viewersEl) {
+    let viewers = 140 + Math.floor(Math.random() * 160);
+    viewersEl.textContent = viewers;
+    setInterval(() => {
+      viewers = Math.max(90, viewers + Math.floor(Math.random() * 11) - 5);
+      viewersEl.textContent = viewers;
+    }, 7000);
   }
 
   /* ============================================================
@@ -203,21 +212,24 @@
   $("#cartClose").addEventListener("click", closeDrawer);
   overlay.addEventListener("click", closeDrawer);
 
-  function addToCart() {
+  function addToCart(showDrawer = true) {
+    const total = UNIT_PRICE * state.qty;
     state.cart.push({
-      id: Date.now() + "-" + Math.round(state.bundlePrice * 100),
+      id: Date.now() + "-" + Math.round(total * 100),
       variant: state.variant.name,
       img: state.variant.split,
-      qty: state.bundleQty,
-      price: state.bundlePrice,
+      qty: state.qty,
+      price: total,
     });
     renderCart();
-    openDrawer();
-    toast("Added to cart! 🎉");
+    if (showDrawer) {
+      openDrawer();
+      toast("Added to cart! 🎉");
+    }
     track("add_to_cart", {
       currency: "USD",
-      value: state.bundlePrice,
-      items: [{ item_name: PRODUCT.name, item_variant: state.variant.name, quantity: state.bundleQty }],
+      value: total,
+      items: [{ item_name: PRODUCT.name, item_variant: state.variant.name, quantity: state.qty }],
     });
   }
 
@@ -240,7 +252,7 @@
         <img src="${c.img}" alt="${c.variant}">
         <div class="cart-item-info">
           <strong>${PRODUCT.title}</strong>
-          <div class="ci-variant">${c.variant} · Pack of ${c.qty}</div>
+          <div class="ci-variant">${c.variant} · Qty: ${c.qty}</div>
           <div class="ci-gift">${PRODUCT.giftLine}</div>
           <div class="ci-bottom">
             <span class="ci-price">${money(c.price)}</span>
@@ -262,9 +274,10 @@
     );
   }
 
-  $("#buyNow").addEventListener("click", addToCart);
-  $("#stickyBtn").addEventListener("click", addToCart);
-  $("#buyInstant").addEventListener("click", () => { addToCart(); openCheckout(); });
+  // BUY NOW → straight to checkout; "add to cart" links open the drawer
+  $("#buyNow").addEventListener("click", () => { addToCart(false); openCheckout(); });
+  $("#stickyBtn").addEventListener("click", () => addToCart(true));
+  $("#buyInstant").addEventListener("click", () => addToCart(true));
 
   /* ============================================================
      Checkout
@@ -278,7 +291,7 @@
       state.cart
         .map(
           (c) =>
-            `<div class="co-line"><span>${c.variant} · Pack of ${c.qty}</span><span>${money(c.price)}</span></div>`
+            `<div class="co-line"><span>${c.variant} × ${c.qty}</span><span>${money(c.price)}</span></div>`
         )
         .join("") +
       `<div class="co-line"><span>Delivery (within 2 days 🚚)</span><span>FREE</span></div>` +
