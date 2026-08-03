@@ -18,7 +18,7 @@
     if (typeof window.gtag === "function") window.gtag("event", name, params || {});
   }
 
-  // Meta Pixel event helper (loader in pixel.js; no-op until the ID is set)
+  // Meta Pixel event helper (base code lives in each page's <head>)
   function fbTrack(name, params) {
     if (typeof window.fbq === "function") window.fbq("track", name, params || {});
   }
