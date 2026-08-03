@@ -4,7 +4,7 @@
    2. Paste its 15-16 digit ID below
    The pixel stays OFF until a real ID is set.
    ============================================================ */
-var META_PIXEL_ID = "REPLACE_WITH_YOUR_PIXEL_ID";
+var META_PIXEL_ID = "1698271231394054";
 
 if (/^\d{10,20}$/.test(META_PIXEL_ID)) {
   /* Standard Meta Pixel loader */
