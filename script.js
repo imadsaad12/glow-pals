@@ -18,6 +18,11 @@
     if (typeof window.gtag === "function") window.gtag("event", name, params || {});
   }
 
+  // Meta Pixel event helper (loader in pixel.js; no-op until the ID is set)
+  function fbTrack(name, params) {
+    if (typeof window.fbq === "function") window.fbq("track", name, params || {});
+  }
+
   // Lebanese mobiles: 03 XXX XXX, 7X XXX XXX (70/71/76/78/79…), 81 XXX XXX — with or without +961
   function isLebaneseMobile(raw) {
     let p = String(raw || "").replace(/\D/g, "");
@@ -232,6 +237,12 @@
       cta: source, // which button was clicked
       items: [{ item_name: PRODUCT.name, item_variant: state.variant.name, quantity: state.qty, price: UNIT_PRICE }],
     });
+    fbTrack("AddToCart", {
+      content_name: PRODUCT.name,
+      content_type: "product",
+      currency: "USD",
+      value: total,
+    });
   }
 
   function renderCart() {
@@ -329,6 +340,11 @@
         price: UNIT_PRICE,
       })),
     });
+    fbTrack("InitiateCheckout", {
+      currency: "USD",
+      value: total,
+      num_items: state.cart.reduce((a, c) => a + c.qty, 0),
+    });
   }
   function closeCheckout() { coOverlay.classList.remove("show"); }
 
@@ -384,6 +400,13 @@
         price: UNIT_PRICE,
       })),
     });
+    // Meta "Purchase" — the conversion event to optimize ad campaigns on
+    fbTrack("Purchase", {
+      content_name: PRODUCT.name,
+      content_type: "product",
+      currency: "USD",
+      value: total,
+    });
 
     btn.disabled = false;
     btn.innerHTML = btnHtml;
@@ -435,10 +458,16 @@
   renderCart();
   setMain(0);
 
-  // GA4 funnel start: product page viewed
+  // Funnel start: product page viewed (GA4 + Meta)
   track("view_item", {
     currency: "USD",
     value: UNIT_PRICE,
     items: [{ item_name: PRODUCT.name, price: UNIT_PRICE }],
+  });
+  fbTrack("ViewContent", {
+    content_name: PRODUCT.name,
+    content_type: "product",
+    currency: "USD",
+    value: UNIT_PRICE,
   });
 })();
