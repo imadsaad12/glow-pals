@@ -286,8 +286,8 @@
     );
   }
 
-  // BUY NOW → straight to checkout; "add to cart" links open the drawer.
-  // Each button fires its own named GA event so counts are separable.
+  // BUY NOW → straight to checkout with just this item. The cart is only
+  // touched by the "Add to cart" buttons, so closing the popup leaves it empty.
   $("#buyNow").addEventListener("click", () => {
     track("click_buy_now", {
       item_name: PRODUCT.name,
@@ -296,8 +296,15 @@
       value: UNIT_PRICE * state.qty,
       currency: "USD",
     });
-    addToCart(false, "buy_now");
-    openCheckout();
+    openCheckout([
+      {
+        id: "buynow-" + Date.now(),
+        variant: state.variant.name,
+        img: state.variant.split,
+        qty: state.qty,
+        price: UNIT_PRICE * state.qty,
+      },
+    ]);
   });
   $("#stickyBtn").addEventListener("click", () => {
     track("click_add_to_cart", { item_name: PRODUCT.name, cta: "sticky_bar" });
@@ -312,12 +319,16 @@
      Checkout
      ============================================================ */
   const coOverlay = $("#checkoutOverlay");
-  function openCheckout() {
-    if (state.cart.length === 0) { toast("Add something first 💜"); return; }
+  // items: optional one-off list (Buy Now). Omitted → checks out the cart.
+  function openCheckout(items) {
+    const list = items || state.cart;
+    if (list.length === 0) { toast("Add something first 💜"); return; }
+    state.checkoutItems = list;
+    state.checkoutIsCart = !items;
     closeDrawer();
-    const total = state.cart.reduce((a, c) => a + c.price, 0);
+    const total = list.reduce((a, c) => a + c.price, 0);
     $("#coSummary").innerHTML =
-      state.cart
+      list
         .map(
           (c) =>
             `<div class="co-line"><span>${c.variant} × ${c.qty}</span><span>${money(c.price)}</span></div>`
@@ -333,7 +344,7 @@
     track("begin_checkout", {
       currency: "USD",
       value: total,
-      items: state.cart.map((c) => ({
+      items: list.map((c) => ({
         item_name: PRODUCT.name,
         item_variant: c.variant,
         quantity: c.qty,
@@ -343,7 +354,7 @@
     fbTrack("InitiateCheckout", {
       currency: "USD",
       value: total,
-      num_items: state.cart.reduce((a, c) => a + c.qty, 0),
+      num_items: list.reduce((a, c) => a + c.qty, 0),
     });
   }
   function closeCheckout() { coOverlay.classList.remove("show"); }
@@ -368,7 +379,8 @@
     }
 
     const data = Object.fromEntries(new FormData(form).entries());
-    const total = state.cart.reduce((a, c) => a + c.price, 0);
+    const items = state.checkoutItems || state.cart;
+    const total = items.reduce((a, c) => a + c.price, 0);
     const btn = $("#coSubmit");
     const btnHtml = btn.innerHTML;
     btn.disabled = true;
@@ -377,13 +389,13 @@
     // Local backup of every order attempt
     try {
       const orders = JSON.parse(localStorage.getItem("magicaltoys_orders") || "[]");
-      orders.push({ customer: data, cart: state.cart, total, ts: new Date().toISOString() });
+      orders.push({ customer: data, cart: items, total, ts: new Date().toISOString() });
       localStorage.setItem("magicaltoys_orders", JSON.stringify(orders));
     } catch (_) {}
 
     // Notify Discord (order details) — still show the popup if it fails
     try {
-      await sendOrderToDiscord(data, state.cart, total);
+      await sendOrderToDiscord(data, items, total);
     } catch (err) {
       console.error(err);
     }
@@ -393,7 +405,7 @@
       transaction_id: "MT-" + Date.now(),
       currency: "USD",
       value: total,
-      items: state.cart.map((c) => ({
+      items: items.map((c) => ({
         item_name: PRODUCT.name,
         item_variant: c.variant,
         quantity: c.qty,
@@ -413,8 +425,11 @@
     $("#thanksName").textContent = (data.name || "friend").split(" ")[0];
     $("#checkoutView").hidden = true;
     $("#thanksView").hidden = false;
-    state.cart = [];
-    renderCart();
+    if (state.checkoutIsCart) {
+      state.cart = [];
+      renderCart();
+    }
+    state.checkoutItems = null;
   });
 
   /* ============================================================
