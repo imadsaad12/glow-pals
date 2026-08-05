@@ -305,7 +305,7 @@ h2{font-size:clamp(1.7rem,3.4vw,2.6rem);font-weight:800}
 .btn-outline{flex:1;border:1.5px solid var(--ink);background:#fff;color:var(--ink);font-family:var(--font-head);font-weight:800;font-size:1.02rem;border-radius:999px;cursor:pointer;padding:.8rem 1rem;transition:background .15s}
 .btn-outline:hover{background:#f3f3f6}
 .gift-note{background:#fafafb;border:1px solid var(--line);border-radius:var(--radius-sm);padding:.85rem 1rem;font-size:.95rem;color:var(--ink);margin:1rem 0 0}
-.benefits-list{margin-top:1.2rem}
+.benefits-list{margin-top:.2rem;margin-bottom:1.3rem}
 
 /* ---------- Store home ---------- */
 .header-cta{margin-top:0;padding:.55rem 1.2rem;font-size:.95rem}
